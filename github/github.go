@@ -14,7 +14,7 @@ var ErrNoPR = errors.New("no PR exists for current branch")
 type (
 	Client interface {
 		DetailsForPull(number int) (*PullRequest, error)
-		PullRequestIDsForSha(sha string) ([]int, error)
+		PullRequestIDsForBranch(sha string) ([]int, error)
 		Comment(number int, comment string) error
 		Comments(number int) ([]string, error)
 		ReviewComments(number int) ([]string, error)
@@ -138,6 +138,49 @@ func (c defaultClient) DetailsForPull(number int) (*PullRequest, error) {
 	}
 
 	return pullRequest, nil
+}
+
+func (c defaultClient) PullRequestIDsForBranch(branch string) ([]int, error) {
+	url := fmt.Sprintf("https://api.github.com/repos/%s/%s/pulls/pulls?head=%s:%s", c.owner, c.repo, c.owner, branch)
+	req, err := http.NewRequest("GET", url, nil)
+	if err != nil {
+		return nil, fmt.Errorf("failed to create request: %w", err)
+	}
+
+	req.Header.Set("Authorization", "Bearer "+c.token)
+	req.Header.Set("Accept", "application/vnd.github.groot-preview+json")
+
+	resp, err := http.DefaultClient.Do(req)
+	if err != nil {
+		return nil, fmt.Errorf("request failed: %w", err)
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusOK {
+		body, _ := io.ReadAll(resp.Body)
+		return nil, fmt.Errorf("unexpected status: %d, body: %s", resp.StatusCode, body)
+	}
+
+	body, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return nil, fmt.Errorf("failed to read response body: %w", err)
+	}
+
+	type pullsForShaResponse struct {
+		Number int `json:"number"`
+	}
+
+	var pullRequests []pullsForShaResponse
+	if err := json.Unmarshal(body, &pullRequests); err != nil {
+		return nil, fmt.Errorf("failed to parse JSON: %w", err)
+	}
+
+	numbers := make([]int, len(pullRequests))
+	for i, pull := range pullRequests {
+		numbers[i] = pull.Number
+	}
+
+	return numbers, nil
 }
 
 func (c defaultClient) PullRequestIDsForSha(sha string) ([]int, error) {

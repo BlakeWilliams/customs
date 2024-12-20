@@ -196,12 +196,12 @@ func (c *InspectCmd) GitHubPRNumber() (int, error) {
 		return 0, err
 	}
 
-	sha, err := c.CurrentSha()
+	branch, err := githelpers.CurrentBranch()
 	if err != nil {
 		return 0, err
 	}
 
-	numbers, err := client.PullRequestIDsForSha(sha)
+	numbers, err := client.PullRequestIDsForBranch(branch)
 	if err != nil {
 		return 0, err
 	}
