@@ -1,0 +1,36 @@
+name: Manifest check
+
+on:
+  push:
+    branches: ["main"]
+  pull_request:
+    branches: ["main"]
+
+permissions:
+  contents: read
+  pull-requests: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    env:
+      MANIFEST_GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 10000
+
+      - name: Set up Go
+        uses: actions/setup-go@v4
+        with:
+          go-version: "1.23"
+
+      - name: Fetch target branch
+        run: git fetch --depth=1 origin ${{ github.event.pull_request.base.ref }} ${{ github.event.pull_request.head.ref }}
+
+      - name: Build manifest
+        run: go build -o manifest cmd/manifest/main.go
+
+      - name: Manifest inspection
+        run: git diff origin/${{ github.event.pull_request.base.ref }}...HEAD | ./manifest inspect --sha ${{ github.event.pull_request.head.sha }} --formatter github --strict
