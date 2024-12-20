@@ -141,7 +141,7 @@ func (c defaultClient) DetailsForPull(number int) (*PullRequest, error) {
 }
 
 func (c defaultClient) PullRequestIDsForBranch(branch string) ([]int, error) {
-	url := fmt.Sprintf("https://api.github.com/repos/%s/%s/pulls/pulls?head=%s:%s", c.owner, c.repo, c.owner, branch)
+	url := fmt.Sprintf("https://api.github.com/repos/%s/%s/pulls?head=%s:%s", c.owner, c.repo, c.owner, branch)
 	req, err := http.NewRequest("GET", url, nil)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create request: %w", err)
