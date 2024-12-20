@@ -27,10 +27,10 @@ jobs:
           go-version: "1.23"
 
       - name: Fetch target branch
-        run: git fetch --depth=1 origin ${{ github.event.pull_request.base.ref }} ${{ github.event.pull_request.head.ref }}
+        run: git fetch --depth=1000 origin ${{ github.event.pull_request.base.ref }} ${{ github.event.pull_request.head.ref }}
 
       - name: Build manifest
-        run: go build -o manifest cmd/manifest/main.go
+        run: go build -o manifest cmd/manifest/main.go && mv manifest /usr/bin
 
       - name: Manifest inspection
         run: git diff origin/${{ github.event.pull_request.base.ref }}...HEAD | ./manifest inspect --sha ${{ github.event.pull_request.head.sha }} --formatter github --strict
