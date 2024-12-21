@@ -11,16 +11,16 @@ import (
 // apply rules. It includes information about the PR if present, and the diff.
 type Import struct {
 	// PullTitle is the title of the pull request if present.
-	PullTitle string `json:"pullTitle"`
+	PullTitle string `json:"pullTitle,omitempty"`
 	// PullDescription is the description of the pull request, if present
-	PullDescription string `json:"pullDescription"`
+	PullDescription string `json:"pullDescription,omitempty"`
+	// RepoRef is the pull request number being inspected
+	PullNumber int `json:"pullNumber,omitempty"`
 
 	// RepoOwner is the owner of the repo
 	RepoOwner string `json:"repoOwner"`
 	// RepoName is the name of the repo
 	RepoName string `json:"repoName"`
-	// RepoRef is the pull request number being inspected
-	PullNumber int `json:"pullNumber"`
 
 	// CurrentSha is the sha of the current commit
 	CurrentSha string `json:"currentSha"`

@@ -14,7 +14,7 @@ var ErrNoPR = errors.New("no PR exists for current branch")
 type (
 	Client interface {
 		DetailsForPull(number int) (*PullRequest, error)
-		PullRequestIDsForSha(sha string) ([]int, error)
+		PullRequestIDsForBranch(sha string) ([]int, error)
 		Comment(number int, comment string) error
 		Comments(number int) ([]string, error)
 		ReviewComments(number int) ([]string, error)
@@ -140,8 +140,8 @@ func (c defaultClient) DetailsForPull(number int) (*PullRequest, error) {
 	return pullRequest, nil
 }
 
-func (c defaultClient) PullRequestIDsForSha(sha string) ([]int, error) {
-	url := fmt.Sprintf("https://api.github.com/repos/%s/%s/commits/%s/pulls", c.owner, c.repo, sha)
+func (c defaultClient) PullRequestIDsForBranch(branch string) ([]int, error) {
+	url := fmt.Sprintf("https://api.github.com/repos/%s/%s/pulls?head=%s:%s", c.owner, c.repo, c.owner, branch)
 	req, err := http.NewRequest("GET", url, nil)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create request: %w", err)
