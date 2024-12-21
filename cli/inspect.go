@@ -25,7 +25,6 @@ type InspectCmd struct {
 	concurrency int
 	formatter   string
 	inspectors  []string
-	sha         string
 	strict      bool
 	noGH        bool
 	cCtx        *cli.Context
@@ -110,9 +109,9 @@ func (c *InspectCmd) populateGitHubData(i *manifest.Inspection) error {
 		return err
 	}
 
-	sha, err := c.CurrentSha()
-	if err != nil {
-		return err
+	sha, err := githelpers.UpstreamSha()
+	if err != nil && err != githelpers.ErrNoPushedBranch {
+		return fmt.Errorf("could not find most recently pushed sha. did you push?")
 	}
 
 	prNum, err := c.GitHubPRNumber()
@@ -213,22 +212,6 @@ func (c *InspectCmd) GitHubPRNumber() (int, error) {
 	c._githubPRNumber = numbers[0]
 
 	return numbers[0], nil
-}
-
-func (c *InspectCmd) CurrentSha() (string, error) {
-	sha := c.sha
-	if sha == "" {
-		var err error
-		// Get the most recent pushed SHA so we can fetch the PR details from GitHub
-		sha, err = githelpers.UpstreamSha()
-		if err != nil && err != githelpers.ErrNoPushedBranch {
-			return "", fmt.Errorf("could not find most recently pushed sha. did you push?")
-		}
-
-		c.sha = sha
-	}
-
-	return sha, nil
 }
 
 func applyConfig(configArg string, rootConfig *manifest.Configuration) error {

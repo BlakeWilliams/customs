@@ -50,10 +50,6 @@ func New() *CLI {
 						Name:  "formatter",
 						Usage: "Sets the formatter to use",
 					},
-					&cli.StringFlag{
-						Name:  "sha",
-						Usage: "Sets the current sha",
-					},
 					&cli.BoolFlag{
 						Name:  "strict",
 						Usage: "fails if PR information or other optional data fails to be resolved",
@@ -93,7 +89,6 @@ func New() *CLI {
 						jsonOnly:    cctx.Bool("json-only"),
 						concurrency: cctx.Int("concurrency"),
 						formatter:   cctx.String("formatter"),
-						sha:         cctx.String("sha"),
 						strict:      cctx.Bool("strict"),
 						noGH:        cctx.Bool("no-gh"),
 						cCtx:        cctx,
